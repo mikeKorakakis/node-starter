@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
-const feed_1 = __importDefault(require("src/routes/feed"));
+const feed_1 = __importDefault(require("@/src/routes/feed"));
 if (process.env.NODE_ENV !== "production") {
     require("dotenv").config();
 }

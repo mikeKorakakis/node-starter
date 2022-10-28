@@ -12,13 +12,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const prisma_1 = __importDefault(require("src/lib/prisma"));
+const prisma_1 = __importDefault(require("../lib/prisma"));
 const getPosts = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const posts = yield prisma_1.default.post.findMany();
+    console.log("here");
+    const posts = yield prisma_1.default.post.findMany({ include: { author: true } });
     return res.status(200).json({ message: "posts", posts: posts });
 });
 const createPost = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { title, body } = req.body;
+    const user = yield prisma_1.default.user.findFirst();
+    if (!user) {
+        yield prisma_1.default.user.create({
+            data: {
+                id: 1,
+                name: "test",
+                email: "bob@test.com",
+            },
+        });
+    }
     const post = yield prisma_1.default.post.create({
         data: {
             title,

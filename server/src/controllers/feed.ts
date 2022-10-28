@@ -1,25 +1,26 @@
 import { Request, Response, NextFunction } from "express";
-import prisma from "../lib/prisma";
+import prisma from "src/lib/prisma";
 
 const getPosts = async (req: Request, res: Response, next: NextFunction) => {
-	console.log("here");
-	const posts = await prisma.post.findMany({ include: { author: true } });
-	return res.status(200).json({ message: "posts", posts: posts });
+	const { pageIndex, pageSize } = req.query;
+	const pageIdx = parseInt(pageIndex as string);
+	const pageSz = parseInt(pageSize as string);
+    const postCount = await prisma.post.count();
+	const posts = await prisma.post.findMany({
+		include: { author: true },
+		take: pageSz,
+		skip: pageIdx * pageSz,
+	});
+	return res
+		.status(200)
+		.json({ data: posts, pageCount: Math.ceil(postCount / pageSz) });
 };
 
 const createPost = async (req: Request, res: Response, next: NextFunction) => {
 	const { title, body } = req.body;
 
 	const user = await prisma.user.findFirst();
-	if (!user) {
-		await prisma.user.create({
-			data: {
-				id: 1,
-				name: "test",
-				email: "bob@test.com",
-			},
-		});
-	}
+
 	const post = await prisma.post.create({
 		data: {
 			title,
@@ -27,12 +28,8 @@ const createPost = async (req: Request, res: Response, next: NextFunction) => {
 			author: { connect: { id: 1 } },
 		},
 	});
-	// const post: Post = {
-	// 	id: Math.random(),
-	// 	title: req.body.title,
-	// 	body: req.body.body,
-	// };
-	res.status(201).json({ message: "post created", post: post });
+
+	res.status(201).json({ post });
 };
 
 export default { getPosts, createPost };
